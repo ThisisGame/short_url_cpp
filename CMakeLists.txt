@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(short_url_cpp)
-
+find_package (Threads)
 set(CMAKE_CXX_STANDARD 17)
 
 if (WIN32)
@@ -16,3 +16,4 @@ file(GLOB_RECURSE fmt_cpp "depends/fmt/*.cpp")
 file(GLOB_RECURSE engine_cpp "source/*.cpp")
 
 add_executable(short_url_cpp ${engine_cpp})
+target_link_libraries (myapp ${CMAKE_THREAD_LIBS_INIT})
