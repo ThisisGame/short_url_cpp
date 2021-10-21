@@ -12,6 +12,7 @@ include_directories("depends")
 include_directories("source")
 include_directories("depends/stduuid/gsl")
 
+file(GLOB_RECURSE fmt_cpp "depends/fmt/*.cpp")
 file(GLOB_RECURSE engine_cpp "source/*.cpp")
 
 add_executable(short_url_cpp ${engine_cpp})

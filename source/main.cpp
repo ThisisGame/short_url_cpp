@@ -6,24 +6,6 @@
 #include "cpphttplib/httplib.h"
 #include "simpleini/SimpleIni.h"
 
-unsigned int random_char() {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, 255);
-    return dis(gen);
-}
-
-std::string generate_hex(const unsigned int len) {
-    std::stringstream ss;
-    for (auto i = 0; i < len; i++) {
-        const auto rc = random_char();
-        std::stringstream hexstream;
-        hexstream << std::hex << rc;
-        auto hex = hexstream.str();
-        ss << (hex.length() < 2 ? '0' + hex : hex);
-    }
-    return ss.str();
-}
 
 int main() {
     Debug::Init();
@@ -34,7 +16,8 @@ int main() {
     CSimpleIniA ini;
     ini.SetUnicode();
 
-    SI_Error rc = ini.LoadFile("../data/data.ini");
+    char* ini_file_path="../data/data.ini";
+    SI_Error rc = ini.LoadFile(ini_file_path);
     if (rc < 0) {
         DEBUG_LOG_ERROR("ini.LoadFile error.");
         return 1;
@@ -54,16 +37,22 @@ int main() {
         auto src = req.matches[1];
         DEBUG_LOG_INFO("gen:{}",src.str());
 
-        auto short_url=generate_hex(16).c_str();
-        ini.SetValue("section", short_url, src.str().c_str());
+        auto current_time = std::chrono::system_clock::now();
+        auto duration_in_seconds = std::chrono::duration<double>(current_time.time_since_epoch());
 
-        const char* pv = ini.GetValue("section", short_url, "");
+        double num_seconds = duration_in_seconds.count();
+        auto short_url= fmt::to_string(num_seconds);
+        ini.SetValue("section", short_url.c_str(), src.str().c_str());
+
+        const char* pv = ini.GetValue("section", short_url.c_str(), "");
         if(strcmp(pv,src.str().c_str())!=0){
             DEBUG_LOG_ERROR("gen error:{}",src.str().c_str());
             res.set_content("gen error", "text/plain");
         }else{
             res.set_content(short_url, "text/plain");
         }
+
+        ini.SaveFile(ini_file_path);
     });
 
     svr.Get(R"(/go/([\s\S]*))", [&](const httplib::Request& req, httplib::Response& res) {
@@ -75,7 +64,7 @@ int main() {
             DEBUG_LOG_ERROR("ini.GetValue error:{}", short_url.str().c_str());
             res.set_content("not found", "text/plain");
         }else{
-            res.set_content(pv, "text/plain");
+            res.set_redirect(pv);
         }
     });
 
