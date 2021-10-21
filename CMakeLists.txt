@@ -16,4 +16,4 @@ file(GLOB_RECURSE fmt_cpp "depends/fmt/*.cpp")
 file(GLOB_RECURSE engine_cpp "source/*.cpp")
 
 add_executable(short_url_cpp ${engine_cpp})
-target_link_libraries (myapp ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (short_url_cpp ${CMAKE_THREAD_LIBS_INIT})
