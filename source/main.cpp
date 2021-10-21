@@ -33,6 +33,10 @@ int main() {
     // HTTP
     httplib::Server svr;
 
+    svr.Get("/hi", [](const httplib::Request &, httplib::Response &res) {
+        res.set_content("Hello World!", "text/plain");
+    });
+
     svr.Get(R"(/gen/([\s\S]*))", [&](const httplib::Request& req, httplib::Response& res) {
         auto src = req.matches[1];
         DEBUG_LOG_INFO("gen:{}",src.str());
